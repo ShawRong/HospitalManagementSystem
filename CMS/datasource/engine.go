@@ -27,17 +27,17 @@ type Employee struct {
 type Log struct {
 	UserID     int
 	StatusID   int
-	User       User       `gorm:"foreignkey:UserID";association_foreignkey:ID`
-	RentStatus RentStatus `gorm:"foreignkey:StatusID";association_foreignkey:ID`
+	User       User       `gorm:"foreignkey:UserID;association_foreignkey:ID"`
+	RentStatus RentStatus `gorm:"foreignkey:StatusID;association_foreignkey:ID"`
 }
 
 type Rent struct {
 	UserID     int
 	CarId      int
 	StatusID   int
-	User       User       `gorm:"foreignkey:UserID";association_foreignkey:ID`
-	Car        Car        `gorm:"foreignkey:CarID";association_foreignkey:ID`
-	RentStatus RentStatus `gorm:"foreignkey:StatusID";association_foreignkey:ID`
+	User       User       `gorm:"foreignkey:UserID;association_foreignkey:ID"`
+	Car        Car        `gorm:"foreignkey:CarID;association_foreignkey:ID"`
+	RentStatus RentStatus `gorm:"foreignkey:StatusID;association_foreignkey:ID"`
 }
 
 type RentStatus struct {
@@ -47,8 +47,14 @@ type RentStatus struct {
 	Fine   int
 	Cost   int
 	Date   time.Time
-	User   User `gorm:"foreignkey:UserID";association_foreignkey:ID`
-	Car    Car  `gorm:"foreignkey:CarID";association_foreignkey:ID`
+	User   User `gorm:"foreignkey:UserID;association_foreignkey:ID"`
+	Car    Car  `gorm:"foreignkey:CarID;association_foreignkey:ID"`
+}
+
+type FixLog struct {
+	CarID int
+	Log   string
+	Car   Car `gorm:"foreignkey:CarID;association_foreignkey:ID"`
 }
 
 var CMSdb *gorm.DB
@@ -58,7 +64,7 @@ func DBConnect() error {
 	if err != nil {
 		return err
 	}
-	db.AutoMigrate(&Car{}, &User{}, &Employee{}, &Log{}, &Rent{}, &RentStatus{})
+	db.AutoMigrate(&Car{}, &User{}, &Employee{}, &Log{}, &Rent{}, &RentStatus{}, &FixLog{})
 	CMSdb = db
 	return nil
 }
