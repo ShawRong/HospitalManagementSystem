@@ -41,7 +41,7 @@ type Rent struct {
 }
 
 type RentStatus struct {
-	ID     int `gorm:"primary_key"`
+	ID     int `gorm:"primary_key;AUTO_INCREMENT"`
 	UserID int
 	CarID  int
 	Fine   int
