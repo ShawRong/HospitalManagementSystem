@@ -71,6 +71,43 @@ func GetCar(ctx iris.Context) {
 	return
 }
 
+func GetCarInRange(ctx iris.Context) {
+	type Info struct {
+		Min int `json:"min"`
+		Max int `json:"max"`
+	}
+
+	type temp struct {
+		Status bool         `json:"status"`
+		Data   interface{}  `json:"data"`
+		Slice  []*model.Car `json:"slice"`
+	}
+
+	info := new(Info)
+	if err := ctx.ReadJSON(&info); err != nil {
+		ctx.StatusCode(iris.StatusOK)
+		data := ""
+		ctx.JSON(model.Response{Status: false, Data: data})
+		return
+	}
+	ctx.StatusCode(iris.StatusOK)
+	carsInfo, err := datasource.FindCarInRange(datasource.CMSdb, info.Min, info.Max)
+	if err != nil {
+		data := "Not found"
+		ctx.JSON(model.Response{Status: false, Data: data})
+		return
+	}
+	data := "OK"
+	var slice []*model.Car
+	for _, carInfo := range carsInfo {
+		var car model.Car
+		car.ID = carInfo.ID
+		car.Deposite = carInfo.Deposite
+		slice = append(slice, &car)
+	}
+	ctx.JSON(temp{Status: true, Data: data, Slice: slice})
+}
+
 func DeleteCar(ctx iris.Context) {
 	type IDInfo struct {
 		ID int `json:"ID"`

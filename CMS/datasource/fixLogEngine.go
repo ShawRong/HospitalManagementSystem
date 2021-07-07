@@ -22,6 +22,16 @@ func FindFixLogbyCarID(db *gorm.DB, CarID int) ([]FixLog, error) {
 	}
 }
 
+func FindFixLogInRange(db *gorm.DB, min int, max int) ([]FixLog, error) {
+	var fixLogs []FixLog
+	db.Where("id BETWEEN ? AND ?", min, max).Find(&fixLogs)
+	if len(fixLogs) == 0 {
+		return fixLogs, errors.New("empty slice")
+	} else {
+		return fixLogs, nil
+	}
+}
+
 func DeleteFixLog(db *gorm.DB, CarID int) error {
 	var fixLog FixLog
 	err := db.Where("car_id = ?", CarID).First(&fixLog).Error

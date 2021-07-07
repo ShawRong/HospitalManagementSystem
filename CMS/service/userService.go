@@ -116,3 +116,45 @@ func DeleteUser(ctx iris.Context) {
 		ctx.JSON(model.Response{Status: true, Data: data})
 	}
 }
+
+func GetUserSelf(ctx iris.Context) {
+	type Info struct {
+		ID  int `json:"id"`
+		PWD int `json:"password"`
+	}
+	info := new(Info)
+	if err := ctx.ReadJSON(&info); err != nil {
+		ctx.StatusCode(iris.StatusOK)
+		data := ""
+		ctx.JSON(model.Response{Status: false, Data: data})
+		return
+	}
+	ctx.StatusCode(iris.StatusOK)
+	if info.PWD == info.ID {
+		type temp struct {
+			Status bool          `json:"status"`
+			Data   interface{}   `json:"data"`
+			Slice  []*model.User `json:"slice"`
+		}
+		userInfo, err := datasource.FindUserbyID(datasource.CMSdb, info.ID)
+		if err != nil {
+			data := "Not Found"
+			ctx.JSON((model.Response{Status: false, Data: data}))
+			return
+		} else {
+			data := "OK"
+			var user model.User
+			user.ID = userInfo.ID
+			user.Honesty = userInfo.Honesty
+			user.IsMember = userInfo.IsMember
+			user.Username = userInfo.Username
+			var slice []*model.User
+			slice = append(slice, &user)
+			ctx.JSON(temp{Status: true, Data: data, Slice: slice})
+		}
+	} else {
+		data := "password wrong"
+		ctx.JSON(model.Response{Status: false, Data: data})
+		return
+	}
+}

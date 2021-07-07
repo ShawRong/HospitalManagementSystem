@@ -9,44 +9,34 @@ import (
 )
 
 func NewRent(ctx iris.Context) {
+	tx := datasource.CMSdb.Begin()
 	rent := new(model.Rent)
 	if err := ctx.ReadJSON(&rent); err != nil {
 		ctx.StatusCode(iris.StatusOK)
 		data := ""
 		ctx.JSON(model.Response{Status: false, Data: data})
+		tx.Rollback()
 		return
 	}
 	var rentInfo datasource.Rent
 	rentInfo.UserID = rent.UserID
 	rentInfo.CarId = rent.CarId
-	var err1 error
-	rentInfo.Car, err1 = datasource.FindCarbyID(datasource.CMSdb, rent.CarId)
-	if err1 != nil {
-		ctx.StatusCode(iris.StatusOK)
-		data := "No such car"
-		ctx.JSON(model.Response{Status: false, Data: data})
-	}
-	var err2 error
-	rentInfo.User, err2 = datasource.FindUserbyID(datasource.CMSdb, rent.UserID)
-	if err2 != nil {
-		ctx.StatusCode(iris.StatusOK)
-		data := "No such user"
-		ctx.JSON(model.Response{Status: false, Data: data})
-	}
 	var rentStatus datasource.RentStatus
 	rentStatus.CarID = rentInfo.CarId
 	rentStatus.UserID = rentInfo.UserID
+	rentStatus.ChargerID = 1
 	rentStatus.Date = time.Now()
-	datasource.CreateRentStatus(datasource.CMSdb, rentStatus)
+	datasource.CreateRentStatusPointer(tx, &rentStatus)
 	rentInfo.StatusID = rentStatus.ID
-
-	err := datasource.CreateRent(datasource.CMSdb, rentInfo)
+	err := datasource.CreateRentPointer(tx, &rentInfo)
 	if err != nil {
 		data := "Exist"
 		ctx.JSON(model.Response{Status: true, Data: data})
+		tx.Rollback()
 	} else {
 		data := "OK"
 		ctx.JSON(model.Response{Status: true, Data: data})
+		tx.Commit()
 	}
 }
 
@@ -90,4 +80,46 @@ func GetRent(ctx iris.Context) {
 		ctx.JSON(model.Response{Status: true, Data: data})
 	}
 	return
+}
+
+func GetPayBack(ctx iris.Context) {
+	type Info struct {
+		UserID int `json:"userID"`
+		CarID  int `json:"carID"`
+	}
+	info := new(Info)
+	if err := ctx.ReadJSON(&info); err != nil {
+		ctx.StatusCode(iris.StatusOK)
+		data := ""
+		ctx.JSON(model.Response{Status: false, Data: data})
+		return
+	}
+	ctx.StatusCode(iris.StatusOK)
+	rentInfo, err := datasource.FindRentbyUserIDCarID(datasource.CMSdb, info.UserID, info.CarID)
+	if err != nil {
+		data := "Not Found"
+		ctx.JSON(model.Response{Status: false, Data: data})
+		return
+	} else {
+		type temp struct {
+			Status  bool        `json:"status"`
+			Data    interface{} `json:"data"`
+			PayBack int         `json:"payback"`
+		}
+		data := "OK"
+		carInfo, err := datasource.FindCarbyID(datasource.CMSdb, info.CarID)
+		if err != nil {
+			data := "Car Not Found"
+			ctx.JSON(model.Response{Status: false, Data: data})
+			return
+		}
+		rentStatusInfo, err := datasource.FindRentStatusbyID(datasource.CMSdb, rentInfo.StatusID)
+		if err != nil {
+			data := "RentStatus Not Found"
+			ctx.JSON(model.Response{Status: false, Data: data})
+			return
+		}
+		payback := carInfo.Deposite - rentStatusInfo.Fine - rentStatusInfo.Cost
+		ctx.JSON(temp{Status: true, Data: data, PayBack: payback})
+	}
 }

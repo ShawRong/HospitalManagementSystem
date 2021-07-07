@@ -22,6 +22,16 @@ func FindCarbyID(db *gorm.DB, ID int) (Car, error) {
 	return car, nil
 }
 
+func FindCarInRange(db *gorm.DB, min int, max int) ([]Car, error) {
+	var cars []Car
+	db.Where("id BETWEEN ? AND ?", min, max).Find(&cars)
+	if len(cars) == 0 {
+		return cars, errors.New("empty slice")
+	} else {
+		return cars, nil
+	}
+}
+
 func UpdateCar(db *gorm.DB, ID int, car Car) error {
 	foundCar, err := FindCarbyID(db, ID)
 	if err != nil {

@@ -12,6 +12,11 @@ func CreateRentStatus(db *gorm.DB, rentStatus RentStatus) error {
 	return err
 }
 
+func CreateRentStatusPointer(db *gorm.DB, rentStatus *RentStatus) error {
+	err := db.Create(rentStatus).Error
+	return err
+}
+
 func FindRentStatusbyID(db *gorm.DB, ID int) (RentStatus, error) {
 	var rentStatus RentStatus
 	err := db.Where("id = ?", ID).First(&rentStatus).Error

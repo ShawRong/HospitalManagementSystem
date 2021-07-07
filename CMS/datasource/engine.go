@@ -8,53 +8,48 @@ import (
 )
 
 type Car struct {
-	ID       int `gorm:"primary_key"`
+	ID       int `gorm:"primary_key;AUTO_INCREMENT"`
 	Deposite int
 }
 
 type User struct {
 	Username string
 	IsMember bool
-	ID       int `gorm:"primary_key"`
+	ID       int `gorm:"primary_key;AUTO_INCREMENT"`
 	Honesty  int
 }
 
 type Employee struct {
-	ID   int `gorm:"primary_key"`
+	ID   int `gorm:"primary_key;AUTO_INCREMEN"`
 	Name string
 }
 
 type Log struct {
-	UserID     int
-	StatusID   int
-	User       User       `gorm:"foreignkey:UserID;association_foreignkey:ID"`
-	RentStatus RentStatus `gorm:"foreignkey:StatusID;association_foreignkey:ID"`
+	UserID   int
+	StatusID int
 }
 
 type Rent struct {
-	UserID     int
-	CarId      int
-	StatusID   int
-	User       User       `gorm:"foreignkey:UserID;association_foreignkey:ID"`
-	Car        Car        `gorm:"foreignkey:CarID;association_foreignkey:ID"`
-	RentStatus RentStatus `gorm:"foreignkey:StatusID;association_foreignkey:ID"`
+	UserID   int `gorm:"primary_key;AUTO_INCREMENT:false"`
+	CarId    int `gorm:"primary_key;AUTO_INCREMENT:false"`
+	StatusID int
 }
 
 type RentStatus struct {
-	ID     int `gorm:"primary_key;AUTO_INCREMENT"`
-	UserID int
-	CarID  int
-	Fine   int
-	Cost   int
-	Date   time.Time
-	User   User `gorm:"foreignkey:UserID;association_foreignkey:ID"`
-	Car    Car  `gorm:"foreignkey:CarID;association_foreignkey:ID"`
+	ID        int `gorm:"primary_key;AUTO_INCREMENT"`
+	UserID    int
+	CarID     int
+	Fine      int
+	Cost      int
+	ChargerID int
+	Date      time.Time
 }
 
 type FixLog struct {
+	ID    int `gorm:"primary_key;AUTO_INCREMENT"`
 	CarID int
-	Log   string
-	Car   Car `gorm:"foreignkey:CarID;association_foreignkey:ID"`
+	Fee   int
+	Time  time.Time
 }
 
 var CMSdb *gorm.DB
@@ -65,6 +60,15 @@ func DBConnect() error {
 		return err
 	}
 	db.AutoMigrate(&Car{}, &User{}, &Employee{}, &Log{}, &Rent{}, &RentStatus{}, &FixLog{})
+	db.Model(&Log{}).AddForeignKey("user_id", "users(id)", "CASCADE", "CASCADE")
+	db.Model(&Log{}).AddForeignKey("status_id", "rent_statuses(id)", "CASCADE", "CASCADE")
+	db.Model(&Rent{}).AddForeignKey("user_id", "users(id)", "CASCADE", "CASCADE")
+	db.Model(&Rent{}).AddForeignKey("car_id", "cars(id)", "CASCADE", "CASCADE")
+	db.Model(&Rent{}).AddForeignKey("status_id", "rent_statuses(id)", "CASCADE", "CASCADE")
+	db.Model(&RentStatus{}).AddForeignKey("charger_id", "employees(id)", "CASCADE", "CASCADE")
+	db.Model(&RentStatus{}).AddForeignKey("user_id", "users(id)", "CASCADE", "CASCADE")
+	db.Model(&RentStatus{}).AddForeignKey("car_id", "cars(id)", "CASCADE", "CASCADE")
+	db.Model(&FixLog{}).AddForeignKey("car_id", "cars(id)", "CASCADE", "CASCADE")
 	CMSdb = db
 	return nil
 }

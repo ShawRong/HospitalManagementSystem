@@ -12,6 +12,11 @@ func CreateRent(db *gorm.DB, rent Rent) error {
 	return err
 }
 
+func CreateRentPointer(db *gorm.DB, rent *Rent) error {
+	err := db.Create(rent).Error
+	return err
+}
+
 func FindRentbyUserID(db *gorm.DB, UserID int) ([]Rent, error) {
 	var rents []Rent
 	db.Where("user_id = ?", UserID).Find(&rents)
@@ -20,6 +25,16 @@ func FindRentbyUserID(db *gorm.DB, UserID int) ([]Rent, error) {
 	} else {
 		return rents, nil
 	}
+}
+
+func FindRentbyUserIDCarID(db *gorm.DB, UserID int, CarID int) (Rent, error) {
+	var rent Rent
+	err := db.Where("user_id = ? AND car_id = ?", UserID, CarID).Find(&rent).Error
+	if err != nil {
+		var invalid Rent
+		return invalid, err
+	}
+	return rent, nil
 }
 
 func DeleteRent(db *gorm.DB, UserID int, CarID int) error {

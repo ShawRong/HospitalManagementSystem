@@ -1,6 +1,12 @@
 package model
 
+import (
+	"time"
+)
+
 type FixLog struct {
-	CarID int    `json:"carID"`
-	Log   string `json:"log"`
+	ID    int       `json:"ID"`
+	CarID int       `json:"carID"`
+	Fee   int       `json:"fee"`
+	Time  time.Time `josn:"time"`
 }
