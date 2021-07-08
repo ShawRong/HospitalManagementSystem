@@ -16,7 +16,7 @@ func NewUserTest(username string, isMemeber bool, honesty int) {
 	} else {
 		temp = "false"
 	}
-	payload := strings.NewReader(`{` + "" + `"username":` + `"` + username + `"` + `,` + "" + `"isMemeber":` + temp + `,` + "" + `"honesty":` + strconv.Itoa(honesty) + "" + `}`)
+	payload := strings.NewReader(`{` + "" + `"username":` + `"` + username + `"` + `,` + "" + `"isMember":` + temp + `,` + "" + `"honesty":` + strconv.Itoa(honesty) + "" + `}`)
 	req, err := http.NewRequest(method, RootUrl+"admin/user/new", payload)
 
 	if err != nil {
