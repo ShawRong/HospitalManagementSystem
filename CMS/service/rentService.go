@@ -123,3 +123,25 @@ func GetPayBack(ctx iris.Context) {
 		ctx.JSON(temp{Status: true, Data: data, PayBack: payback})
 	}
 }
+
+func DeleteRent(ctx iris.Context) {
+	tx := datasource.CMSdb.Begin()
+	rent := new(model.Rent)
+	if err := ctx.ReadJSON(&rent); err != nil {
+		ctx.StatusCode(iris.StatusOK)
+		data := ""
+		ctx.JSON(model.Response{Status: false, Data: data})
+		tx.Rollback()
+		return
+	}
+	err := datasource.DeleteRent(tx, rent.UserID, rent.CarId)
+	if err != nil {
+		data := "Not Exist"
+		ctx.JSON(model.Response{Status: true, Data: data})
+		tx.Rollback()
+	} else {
+		data := "OK"
+		ctx.JSON(model.Response{Status: true, Data: data})
+		tx.Commit()
+	}
+}

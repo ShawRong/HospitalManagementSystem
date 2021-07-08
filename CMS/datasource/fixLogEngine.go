@@ -32,9 +32,9 @@ func FindFixLogInRange(db *gorm.DB, min int, max int) ([]FixLog, error) {
 	}
 }
 
-func DeleteFixLog(db *gorm.DB, CarID int) error {
+func DeleteFixLog(db *gorm.DB, ID int) error {
 	var fixLog FixLog
-	err := db.Where("car_id = ?", CarID).First(&fixLog).Error
+	err := db.Where("id = ?", ID).First(&fixLog).Error
 	if err != nil {
 		return err
 	}

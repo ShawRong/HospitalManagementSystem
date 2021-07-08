@@ -89,7 +89,7 @@ func DeleteFixLog(ctx iris.Context) {
 	err := datasource.DeleteFixLog(datasource.CMSdb, id.ID)
 	if err != nil {
 		data := "delete error"
-		ctx.JSON(model.Response{Status: true, Data: data})
+		ctx.JSON(model.Response{Status: false, Data: data})
 	} else {
 		data := "OK"
 		ctx.JSON(model.Response{Status: true, Data: data})

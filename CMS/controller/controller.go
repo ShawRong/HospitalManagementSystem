@@ -38,6 +38,7 @@ func HubController(app *iris.Application) {
 	rent.Post("/get", service.GetRent)
 	rent.Post("/new", service.NewRent)
 	rent.Post("/getPayBack", service.GetPayBack)
+	rent.Post("/delete", service.DeleteRent)
 
 	/*router rentStatus*/
 	rentStatus := admin.Party("/rentStatus")
